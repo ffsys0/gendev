@@ -45,10 +45,11 @@ sudo apt install libssl-dev
 
 Here are response times for sample queries:
 
-- **Bayern Munich query:** 45.37 ms
-- **Hatayspor, Deutschland, Bayern Munich, and Real Madrid query:** 831.00 ms
-- **Oxford United, Los Angeles FC, AS Roma query:** 34.67 ms
-- **All games:** 19.77 s
+- **Bayern Munich query:** 29.39 ms
+- **Hatayspor, Deutschland, Bayern Munich, and Real Madrid query:** 30.98 ms
+- **Oxford United, Los Angeles FC, AS Roma query:** 29.73 ms
+- **All games:** 373.79ms  
+
 Tested on a Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz with 16 GB RAM.
 ## Running Tests
 
