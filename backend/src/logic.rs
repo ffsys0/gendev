@@ -42,7 +42,7 @@ impl Ord for Subset {
         self.partial_cmp(other).unwrap()
     }
 }
-
+// does not remove package which is more expensive if it was added first in coverage_list?! just sort by price maybe lol?
 pub fn discard_packages_which_cover_same_games(required_games: &BitSet, packages: &mut Vec<usize>, state: &AppState) {
     let mut coverage_list = Vec::new();
     packages.retain(|&pkg_idx| {
@@ -51,7 +51,7 @@ pub fn discard_packages_which_cover_same_games(required_games: &BitSet, packages
         let price = state.packages.iter()
             .find(|p| p.id == pkg_idx)
             .unwrap()
-            .monthly_price_yearly_subscription_in_cents
+            .monthly_price_yearly_subscription_in_cents // naja so halb richtig weil was wenn montly billing oder so?
             .unwrap();
         for (pkg_id, coverage) in coverage_list.iter() {
             if covered_req.is_subset(coverage) && price >= state.packages.iter().find(|p| p.id == *pkg_id).unwrap().monthly_price_yearly_subscription_in_cents.unwrap() {
@@ -67,11 +67,14 @@ pub fn discard_packages_which_cover_same_games(required_games: &BitSet, packages
 pub fn find_minimal_packages(
     required_games: &BitSet,
     state: &AppState,
-    consider_packages: Vec<usize>,
+    consider_packages: Vec<usize>, // already respects the monthly bound
     monthly: bool,
 ) -> Option<Vec<usize>> {
     let mut consider_packages = consider_packages;
     log::debug!("consider_packages: {}", consider_packages.len());
+    // consider_packages.sort_by_key(|&pkg_idx| {
+    //     state.packages.iter().find(|p| p.id == pkg_idx).unwrap().monthly_price_yearly_subscription_in_cents.unwrap()
+    // });
     discard_packages_which_cover_same_games(required_games, &mut consider_packages, state);
     let mut result: Vec<usize> = Vec::new();
     let mut heap: BinaryHeap<Subset> = BinaryHeap::new();
@@ -90,11 +93,14 @@ pub fn find_minimal_packages(
             }
         }
     }
-
+    // what about edge case where already everything is covered??? is this possible? TODO
     for game_id in required_games.iter() {
         if coverage_count.get(&game_id).unwrap_or(&0) <= &threshhold {
-            for (pkg_idx, coverage) in state.packages_to_covered_games.iter().enumerate() {
+            for (pkg_idx, coverage) in state.packages_to_covered_games.iter().enumerate() { // iters over all packages possibly not respecting monthly bound
                 if coverage.contains(game_id) {
+                    if monthly && state.packages.iter().find(|p| p.id == pkg_idx).unwrap().monthly_price_cents.is_none(){
+                        continue;
+                    }
                     let mut single_covered = BitSet::new();
                     single_covered.union_with(&my_copy[pkg_idx]);
                     let single_price = if monthly {

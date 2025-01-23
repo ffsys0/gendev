@@ -107,14 +107,15 @@ async fn get_streaming_packages(
             actix_web::error::ErrorInternalServerError(format!("Could not find game {}", game))
         })?;
 
-        if query.only_monthly_billing
+        if ((query.only_monthly_billing
             && state
                 .packages
                 .iter()
                 .find(|p| p.id == *package) // packages are only of about 40 elements so this is fine
                 .unwrap()
                 .monthly_price_cents
-                .is_some()
+                .is_some())
+            || !query.only_monthly_billing)
             && !result_packages.contains(package) // result packages is small so this is fine
         {
                 result_packages.push(*package);
