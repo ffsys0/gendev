@@ -111,6 +111,7 @@ function home() {
             setSelectedTournaments([])
             setAllGames(false)
             setFormats(['live'])
+            setOnlyMonthlyBilling(false)
           }} variant="contained" fullWidth>New Comparsion</Button></>)
         :
         <Container sx={{ height: '100vh', padding: 2, minHeight: "100%" }} maxWidth="lg">
